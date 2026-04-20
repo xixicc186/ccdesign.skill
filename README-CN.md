@@ -1,55 +1,104 @@
 <div align="center">
 
-<h1>ccdesign.skill</h1>
-<p>Claude Code 的专业设计 Skill</p>
+# ccdesign.skill
 
-<p>
-  <a href="README.md">English</a> · <a href="README-CN.md">中文</a>
-</p>
+**让 Claude Code 变成你的 AI 创意总监。**  
+你说做什么，它像设计师一样思考，而不只是生成代码。
 
 </div>
 
 ---
 
-## 这是什么
+## 能做什么
 
-让 Claude Code 具备专业设计能力的 skill，可以直接输出幻灯片、落地页、海报、文档和动画视频。
+`/design` 是所有视觉创作任务的统一入口。你描述需求 —— 投资人 PPT、落地页、海报、PDF 报告 —— skill 先做设计决策（颜色、字体、布局、多方案对比），再交给对应工具生成文件。
 
-### 支持的输出格式
+**支持的输出类型：**
 
-| 你的需求 | 输出结果 |
-|---|---|
-| 幻灯片 / PPT / 演讲稿 | 可直接用 Keynote 或 PowerPoint 打开的 `.pptx` 文件 |
-| 落地页 / 原型 / App 界面 | 独立 `.html` 文件，浏览器直接打开 |
-| 海报 / 封面 / Banner / 小红书封面 | 按目标尺寸精确输出的图片文件 |
-| 报告 / 手册 / 文档 | 设计精良、可打印的 `.pdf` |
-| 片头动画 / MG 动画 / 视频 | 通过 Remotion 渲染的视频文件 |
+| 需求 | 输出 |
+|------|------|
+| PPT / 幻灯片 / deck | `.pptx`（PptxGenJS 生成）|
+| 落地页 / 原型 / 网页界面 | 独立 `.html` 文件 |
+| 海报 / 封面 / 小红书封面 | 固定尺寸 `.html` → 截图 |
+| 报告 / 手册 / A4 文档 | 可打印 `.html` → `.pdf` |
+| 动画 / 视频 / MG 动画 | Remotion 项目 |
 
-### 设计智能
+---
 
-- **风格库** — 内置 60+ 真实品牌设计系统。选一个品牌（Notion、Stripe、Cursor、苹果、法拉利……），输出就会完整复刻该品牌的配色、字体和间距规范。
-- **多方案对比** — 默认生成 3 个设计方向（保守 → 标准 → 大胆），让你选最满意的。
-- **杜绝 AI 烂设计** — 强渐变背景、占位符文案、通用系统字体一律禁用，输出看起来是有人设计过的。
+## 54 个内置品牌设计系统
 
-### 示例提示词
+本地离线，无需网络请求，读取速度更快。
+
+**AI / 大模型：** `claude` · `x.ai` · `elevenlabs` · `mistral.ai` · `ollama` · `replicate` · `minimax` · `together.ai` · `voltagent` · `cohere`
+
+**极简 / 工程师审美：** `notion` · `linear` · `vercel` · `stripe` · `resend` · `cal` · `expo` · `opencode.ai`
+
+**暗色 / 科技感：** `cursor` · `raycast` · `superhuman` · `warp` · `spacex` · `nvidia` · `sentry` · `runwayml`
+
+**活泼 / 创意：** `figma` · `framer` · `lovable` · `clay` · `miro` · `posthog` · `zapier` · `webflow` · `airtable`
+
+**商务 / 企业：** `apple` · `ibm` · `airbnb` · `intercom` · `hashicorp` · `mongodb` · `sanity`
+
+**金融：** `coinbase` · `revolut` · `wise` · `kraken`
+
+**其他：** `spotify` · `mintlify` · `supabase` · `uber` · `pinterest` · `composio` · `clickhouse` · `bmw`
+
+每个文件包含：精确 HEX 色值、字体搭配、间距体系、组件样式、设计规范。
+
+---
+
+## 工作流程
 
 ```
-帮我做一份 10 页的 B2B SaaS 融资 PPT，参考 Stripe 的风格
-```
-```
-设计一个 App 落地页，移动端，暗色主题，类似 Raycast 的感觉
-```
-```
-做一张团建活动海报，风格温暖活泼，尺寸 1080×1350
-```
-```
-帮我搭一个数据仪表盘的 UI 原型，桌面端，暗色模式
+你：/design 给我做个 SaaS 产品落地页，Notion 风格
 ```
 
-## 安装方式
+skill 会：
+
+1. 判断输出类型（原型 → HTML）
+2. 问 3–5 个定向问题（受众、内容、是否需要交互）
+3. 读取本地 `design-md/notion/DESIGN.md`（无网络请求）
+4. 在写任何代码前，大声说出每个设计决定
+5. 生成 3 个方案（保守 → 标准 → 大胆）
+6. 自动截图，并排展示
+7. 你选一个，导出
+
+---
+
+## 安装
 
 ```bash
-claude mcp install https://github.com/xixicc186/ccdesign.skill
+git clone https://github.com/xixicc186/ccdesign.skill ~/.claude/skills/design
 ```
 
-或手动安装：克隆本仓库，将内容放入 `~/.claude/skills/design/` 目录，重启 Claude Code 即可。
+然后在 Claude Code 中：
+
+```
+/design 你的需求
+```
+
+---
+
+## 设计理念
+
+- **拒绝 AI 垃圾设计** — 不用渐变大背景、不用 emoji 装饰、不用 Inter 做展示字、不用左边彩色 border 的卡片
+- **品牌原汁原味** — 读真正的设计规范文件，不是摘要
+- **至少 3 个方案** — 保守、标准、大胆，让你选择，而不是直接接受
+- **解释每个决定** — "V1 用深海军蓝配奶油白传递专业感；V2 用珊瑚红更有活力" — 你始终掌控方向
+- **正确分工** — design skill 管美学决策；pptx/pdf/remotion skill 管技术生成
+
+---
+
+## 依赖
+
+skill 需要其他 skill 来生成文件，按需安装：
+
+- `pptx` skill — 生成 `.pptx`
+- `pdf` skill — 生成 `.pdf`
+- `remotion` skill — 生成视频
+
+---
+
+## 开源协议
+
+MIT

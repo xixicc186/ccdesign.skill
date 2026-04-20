@@ -157,16 +157,19 @@ Do not start designing without answers.
 Design without context produces generic results. Before writing any code:
 
 **If user selected a brand style from Step 2:**
-- Fetch the DESIGN.md using WebFetch: `https://getdesign.md/{brand}/design-md`
-  - Example: user chose `notion` → fetch `https://getdesign.md/notion/design-md`
+- **First, check local files**: Read `~/.claude/skills/design/design-md/design-md/{brand}/DESIGN.md`
+  - Example: user chose `notion` → read `~/.claude/skills/design/design-md/design-md/notion/DESIGN.md`
+  - If the local file exists, use it — do NOT make a network request
+  - If the local file does NOT exist, fall back to WebFetch: `https://getdesign.md/{brand}/design-md`
 - Read the full document carefully. It contains: color palette with exact hex codes, typography rules, component styling, layout principles, do's and don'ts
 - State what you extracted: "我读取了 Notion 的 DESIGN.md，主色 #FFFFFF，背景 #F7F6F3，字体 Söhne + Georgia，卡片无阴影，圆角 3px。"
 - Use these values as the authoritative source — override your own defaults with the brand's spec
 
 **If user did NOT select a brand but gave a mood/direction:**
-- Pick the closest matching brand from the design-md collection and fetch it anyway
+- Pick the closest matching brand from the design-md collection and read it anyway
 - Tell the user: "你说极简克制，我参考 Linear 的设计系统来确保风格一致性。"
-- Then fetch: `https://getdesign.md/linear.app/design-md`
+- **First check local**: `~/.claude/skills/design/design-md/design-md/{brand}/DESIGN.md`
+- Fall back to WebFetch only if local file missing: `https://getdesign.md/linear.app/design-md`
 - Mood → suggested brand mapping:
   - 极简克制 → `linear` or `vercel`
   - 商务专业 → `stripe` or `notion`

@@ -1,11 +1,9 @@
 <div align="center">
 
-<h1>ccdesign.skill</h1>
-<p>A design agent skill for Claude Code</p>
+# ccdesign.skill
 
-<p>
-  <a href="README.md">English</a> · <a href="README-CN.md">中文</a>
-</p>
+**A Claude Code skill that turns you into a creative director.**  
+Tell it what to make. It thinks like a designer, not a code generator.
 
 </div>
 
@@ -13,43 +11,94 @@
 
 ## What It Does
 
-A skill that turns Claude Code into a professional design agent — capable of producing slides, landing pages, posters, documents, and motion videos on demand.
+`/design` is a single entry point for all visual creation tasks. You describe what you want — slides for investors, a landing page, a poster, a PDF report — and the skill handles design decisions (color, typography, layout, variants) before delegating to format-specific tools.
 
-### Output Types
+**Output types:**
 
-| Ask for | You get |
-|---|---|
-| Slides / deck / presentation | A `.pptx` file ready to open in Keynote or PowerPoint |
-| Landing page / UI prototype / app mockup | A standalone `.html` file, opens in any browser |
-| Poster / cover / banner / social image | A pixel-perfect image file at your target dimensions |
-| Report / handbook / PDF document | A designed, print-ready `.pdf` |
-| Intro animation / motion video | A rendered video via Remotion |
+| Request | Output |
+|---------|--------|
+| PPT / deck / 幻灯片 | `.pptx` via PptxGenJS |
+| Landing page / prototype / 落地页 | Standalone `.html` |
+| Poster / cover / 小红书封面 | Fixed-px `.html` → screenshot |
+| Document / report / 手册 | Print-ready `.html` → `.pdf` |
+| Animation / video / 动画 | Remotion project |
 
-### Design Intelligence
+---
 
-- **Style library** — 60+ real brand design systems built in. Pick a brand (Notion, Stripe, Cursor, Apple, Ferrari…) and your output matches that aesthetic with exact colors, typography, and spacing rules.
-- **Multiple variants** — Generates 3 design directions by default (conservative → standard → bold) so you can pick the one you prefer.
-- **No AI slop** — Gradient-heavy backgrounds, filler copy, and generic system fonts are explicitly forbidden. Outputs look intentional, not generated.
+## 54 Built-in Design Systems
 
-### Example Prompts
+The skill ships with offline DESIGN.md files for 54 brands — no network request needed.
+
+**AI / LLM:** `claude` · `x.ai` · `elevenlabs` · `mistral.ai` · `ollama` · `replicate` · `minimax` · `together.ai` · `voltagent` · `cohere`
+
+**Minimal / Engineer:** `notion` · `linear` · `vercel` · `stripe` · `resend` · `cal` · `expo` · `opencode.ai`
+
+**Dark / Tech:** `cursor` · `raycast` · `superhuman` · `warp` · `spacex` · `nvidia` · `sentry` · `runwayml`
+
+**Creative / Playful:** `figma` · `framer` · `lovable` · `clay` · `miro` · `posthog` · `zapier` · `webflow` · `airtable`
+
+**Enterprise:** `apple` · `ibm` · `airbnb` · `intercom` · `hashicorp` · `mongodb` · `sanity`
+
+**Finance:** `coinbase` · `revolut` · `wise` · `kraken`
+
+**Other:** `spotify` · `mintlify` · `supabase` · `uber` · `pinterest` · `composio` · `clickhouse` · `bmw`
+
+Each file contains: exact hex codes, font pairings, spacing scale, component styling, do's and don'ts.
+
+---
+
+## How It Works
 
 ```
-Make a 10-slide pitch deck for a B2B SaaS product, Stripe style
+You: /design 给我做个 SaaS 产品落地页，Notion 风格
 ```
-```
-Design a mobile landing page for my app, dark theme, similar to Raycast
-```
-```
-Create a poster for our team offsite, warm and playful, 1080×1350px
-```
-```
-Build a UI prototype for a dashboard, desktop, dark mode
-```
+
+The skill will:
+
+1. Classify the output type (Prototype → HTML)
+2. Ask 3–5 targeted questions (audience, content, interactive or static)
+3. Read `design-md/notion/DESIGN.md` locally (no network call)
+4. State every design decision out loud before writing code
+5. Generate 3 variants (conservative → standard → bold)
+6. Open each in browser, screenshot, show side-by-side
+7. Export the one you pick
+
+---
 
 ## Installation
 
 ```bash
-claude mcp install https://github.com/xixicc186/ccdesign.skill
+git clone https://github.com/xixicc186/ccdesign.skill ~/.claude/skills/design
 ```
 
-Or manually: clone this repo and place the contents into your `~/.claude/skills/design/` directory, then restart Claude Code.
+Then in Claude Code:
+
+```
+/design [your request]
+```
+
+---
+
+## Design Philosophy
+
+- **No AI slop** — no gradient soup, no emoji decoration, no Inter as a display font, no left-border accent cards
+- **Brand fidelity** — reads the actual design spec, not a summary
+- **3 variants minimum** — conservative, standard, bold — so you can choose, not just accept
+- **Explains decisions** — "V1 uses deep navy + cream for authority; V2 uses coral for energy" — you stay in control
+- **Delegates correctly** — design skill owns aesthetics; pptx/pdf/remotion skills own technical generation
+
+---
+
+## Dependencies
+
+The skill delegates to other skills for file generation. Install them if needed:
+
+- `pptx` skill — for `.pptx` output
+- `pdf` skill — for `.pdf` output
+- `remotion` skill — for video output
+
+---
+
+## License
+
+MIT
