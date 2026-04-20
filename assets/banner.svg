@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" role="img" aria-label="ccdesign banner">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5f4ed"/>
+      <stop offset="1" stop-color="#ede9dc"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="320" fill="url(#bg)"/>
+
+  <!-- decorative coral dot bleed, top-right -->
+  <circle cx="1120" cy="60" r="140" fill="#d97757" opacity="0.10"/>
+  <circle cx="1060" cy="280" r="90" fill="#c96442" opacity="0.08"/>
+
+  <!-- logo mark, left -->
+  <g transform="translate(80 80)">
+    <rect width="160" height="160" rx="36" fill="#faf9f5" stroke="#e8e6dc" stroke-width="1"/>
+    <path d="M 99 47 A 37.5 37.5 0 1 0 99 112" stroke="#c96442" stroke-width="17.5" stroke-linecap="round" fill="none" transform="translate(0 0)"/>
+    <circle cx="111" cy="80" r="8" fill="#d97757"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="290" y="175" font-family="Georgia, 'Times New Roman', serif" font-size="88" font-weight="500" fill="#141413" letter-spacing="-2">ccdesign</text>
+  <text x="292" y="220" font-family="Georgia, serif" font-size="22" font-style="italic" fill="#5e5d59">A Claude-flavored design agent skill.</text>
+
+  <!-- palette swatch row, bottom-left, hints at "design" -->
+  <g transform="translate(292 248)">
+    <rect x="0"  y="0" width="28" height="28" rx="6" fill="#c96442"/>
+    <rect x="36" y="0" width="28" height="28" rx="6" fill="#d97757"/>
+    <rect x="72" y="0" width="28" height="28" rx="6" fill="#e8e6dc"/>
+    <rect x="108" y="0" width="28" height="28" rx="6" fill="#141413"/>
+  </g>
+</svg>

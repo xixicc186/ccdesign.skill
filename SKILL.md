@@ -1,5 +1,5 @@
 ---
-name: design
+name: ccdesign
 description: >
   Design agent for creating beautiful visual outputs. Trigger when the user asks to:
   make a deck / slides / presentation, design a poster / cover / banner, build a UI prototype
@@ -157,8 +157,8 @@ Do not start designing without answers.
 Design without context produces generic results. Before writing any code:
 
 **If user selected a brand style from Step 2:**
-- **First, check local files**: Read `~/.claude/skills/design/design-md/design-md/{brand}/DESIGN.md`
-  - Example: user chose `notion` → read `~/.claude/skills/design/design-md/design-md/notion/DESIGN.md`
+- **First, check local files**: Read `~/.claude/skills/ccdesign/design-md/design-md/{brand}/DESIGN.md`
+  - Example: user chose `notion` → read `~/.claude/skills/ccdesign/design-md/design-md/notion/DESIGN.md`
   - If the local file exists, use it — do NOT make a network request
   - If the local file does NOT exist, fall back to WebFetch: `https://getdesign.md/{brand}/design-md`
 - Read the full document carefully. It contains: color palette with exact hex codes, typography rules, component styling, layout principles, do's and don'ts
@@ -168,7 +168,7 @@ Design without context produces generic results. Before writing any code:
 **If user did NOT select a brand but gave a mood/direction:**
 - Pick the closest matching brand from the design-md collection and read it anyway
 - Tell the user: "你说极简克制，我参考 Linear 的设计系统来确保风格一致性。"
-- **First check local**: `~/.claude/skills/design/design-md/design-md/{brand}/DESIGN.md`
+- **First check local**: `~/.claude/skills/ccdesign/design-md/design-md/{brand}/DESIGN.md`
 - Fall back to WebFetch only if local file missing: `https://getdesign.md/linear.app/design-md`
 - Mood → suggested brand mapping:
   - 极简克制 → `linear` or `vercel`

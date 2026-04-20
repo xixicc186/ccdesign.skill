@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="ccdesign" width="100%"/>
+</p>
+
 <div align="center">
 
 # ccdesign.skill
