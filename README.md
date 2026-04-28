@@ -13,6 +13,57 @@ Tell it what to make. It thinks like a designer, not a code generator.
 
 ---
 
+## Showcase — A landing page for the skill itself
+
+The skill was asked to design a landing page for *itself*, deciding the style, components, layout, and interactions on its own. The result lives in [`examples/ccdesign-landing.html`](examples/ccdesign-landing.html). The page's signature interaction *is* the skill's signature: click any chip in the hero and the entire page — palette, accents, gradients — reflows live, because that is exactly what the skill does when it reads a brand's `DESIGN.md`.
+
+<p align="center">
+  <img src="assets/showcase/01-hero.png" alt="ccdesign landing — hero" width="900"/>
+</p>
+
+**Same hero, three live themes — one click each:**
+
+<p align="center">
+  <img src="assets/showcase/06-theme-stripe.png"  alt="Stripe theme"  width="32%"/>
+  <img src="assets/showcase/07-theme-ferrari.png" alt="Ferrari theme" width="32%"/>
+  <img src="assets/showcase/08-theme-linear.png"  alt="Linear theme"  width="32%"/>
+</p>
+
+**Five output formats, each with its own micro-animation on hover:**
+
+<p align="center">
+  <img src="assets/showcase/02-bento-outputs.png" alt="Outputs bento" width="900"/>
+</p>
+
+**An eight-step process timeline driven by scroll-scrub:**
+
+<p align="center">
+  <img src="assets/showcase/03-process.png" alt="Process timeline" width="900"/>
+</p>
+
+**A vocabulary of thirty-eight tastes — drag to scroll horizontally:**
+
+<p align="center">
+  <img src="assets/showcase/04-library.png" alt="Style library" width="900"/>
+</p>
+
+**Direct your designer — terminal CTA:**
+
+<p align="center">
+  <img src="assets/showcase/05-cta-terminal.png" alt="CTA terminal" width="900"/>
+</p>
+
+**Under the hood:** Fraunces + Inter Tight + JetBrains Mono · CSS variables for live theming · GSAP + ScrollTrigger for scroll-scrub · IntersectionObserver as the reveal fallback · vanilla-JS magnetic cursor and 3D perspective tilt · Web Animations API for the theme-flash sweep.
+
+To run it locally:
+
+```bash
+cd examples && python3 -m http.server 8080
+open http://localhost:8080/ccdesign-landing.html
+```
+
+---
+
 ## What It Does
 
 `/design` is a single entry point for all visual creation tasks. You describe what you want — slides for investors, a landing page, a poster, a PDF report — and the skill handles design decisions (color, typography, layout, variants) before delegating to format-specific tools.

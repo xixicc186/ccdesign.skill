@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ccdesign — your design director, on call</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,30..100,0..1&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ─── tokens ───────────────────────────────────────────── */
+:root {
+  --bg:        #0e0d0b;
+  --bg-soft:   #16140f;
+  --ink:       #f3ede1;
+  --ink-mute:  #a39d8f;
+  --ink-dim:   #5e5849;
+  --accent:    #c85228;     /* terracotta — Claude-like */
+  --accent-2:  #e9b872;     /* sand */
+  --line:      rgba(243,237,225,0.10);
+  --grid:      rgba(243,237,225,0.05);
+  --display: "Fraunces", ui-serif, Georgia, serif;
+  --body:    "Inter Tight", system-ui, sans-serif;
+  --mono:    "JetBrains Mono", ui-monospace, monospace;
+  --ease:    cubic-bezier(.16,1,.3,1);
+}
+
+/* style themes — toggled by data-theme on <html> */
+html[data-theme="claude"]   { --bg:#0e0d0b; --bg-soft:#16140f; --ink:#f3ede1; --ink-mute:#a39d8f; --accent:#c85228; --accent-2:#e9b872; }
+html[data-theme="linear"]   { --bg:#08090a; --bg-soft:#0f1011; --ink:#f7f8f8; --ink-mute:#8a8f98; --accent:#5e6ad2; --accent-2:#b3b9f8; }
+html[data-theme="vercel"]   { --bg:#000000; --bg-soft:#0a0a0a; --ink:#ffffff; --ink-mute:#888888; --accent:#ffffff; --accent-2:#ededed; }
+html[data-theme="stripe"]   { --bg:#0a2540; --bg-soft:#0d2c4d; --ink:#f6f9fc; --ink-mute:#adbdcc; --accent:#a78bfa; --accent-2:#00d4ff; }
+html[data-theme="ferrari"]  { --bg:#fafafa; --bg-soft:#ffffff; --ink:#0a0a0a; --ink-mute:#5a5a5a; --accent:#ed1c24; --accent-2:#000000; }
+html[data-theme="raycast"]  { --bg:#0d0d0d; --bg-soft:#171717; --ink:#fafafa; --ink-mute:#a0a0a0; --accent:#ff6363; --accent-2:#9d6cff; }
+html[data-theme="notion"]   { --bg:#f7f6f3; --bg-soft:#ffffff; --ink:#191918; --ink-mute:#65645f; --accent:#2b2a27; --accent-2:#cb912f; }
+html[data-theme="cursor"]   { --bg:#0c0c0d; --bg-soft:#141415; --ink:#f0f0f0; --ink-mute:#888; --accent:#7e8eff; --accent-2:#62e0c8; }
+
+/* ─── reset / base ─────────────────────────────────────── */
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { background:var(--bg); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased; transition: background-color .8s var(--ease), color .8s var(--ease); }
+body { overflow-x:hidden; cursor:none; }
+a { color:inherit; text-decoration:none; }
+img, video { display:block; max-width:100%; }
+::selection { background:var(--accent); color:var(--bg); }
+
+/* ─── custom cursor ────────────────────────────────────── */
+.cursor, .cursor-dot {
+  position:fixed; top:0; left:0; pointer-events:none; z-index:9999;
+  transform: translate(-50%,-50%);
+  mix-blend-mode: difference;
+}
+.cursor {
+  width:36px; height:36px; border:1px solid var(--ink);
+  border-radius:50%;
+  transition: width .25s var(--ease), height .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease);
+}
+.cursor-dot { width:5px; height:5px; background:var(--ink); border-radius:50%; }
+body.cursor-hover .cursor { width:72px; height:72px; background:var(--ink); border-color:var(--ink); }
+body.cursor-hover .cursor-dot { opacity:0; }
+@media (hover:none) { body{cursor:auto;} .cursor,.cursor-dot{display:none;} }
+
+/* ─── nav ──────────────────────────────────────────────── */
+.nav {
+  position:fixed; inset:0 0 auto 0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 22px 36px;
+  font-family:var(--mono); font-size:12px; letter-spacing:.04em;
+  color:var(--ink-mute);
+  mix-blend-mode: difference;
+}
+.nav .brand { color:var(--ink); display:flex; align-items:center; gap:10px; font-weight:500; }
+.nav .brand .dot { width:8px; height:8px; border-radius:50%; background:var(--accent); }
+.nav .links { display:flex; gap:28px; }
+.nav .links a:hover { color:var(--ink); }
+
+/* ─── hero ─────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  position:relative;
+  padding: 92px 36px 60px;
+  display:flex; flex-direction:column; gap: 56px;
+  background:
+    radial-gradient(900px 500px at 75% 10%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 60%),
+    radial-gradient(700px 400px at 0% 90%, color-mix(in oklab, var(--accent-2) 12%, transparent), transparent 60%),
+    var(--bg);
+  overflow:hidden;
+  transition: background .8s var(--ease);
+}
+.hero::before {
+  content:""; position:absolute; inset:0;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+.hero-meta {
+  display:flex; justify-content:space-between; align-items:flex-end;
+  font-family:var(--mono); font-size:11px; color:var(--ink-mute); letter-spacing:.06em; text-transform:uppercase;
+  position:relative;
+}
+.hero-meta .count { font-family:var(--display); font-size:14px; color:var(--ink); font-weight:300; letter-spacing:0; text-transform:none; }
+
+.hero-title {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(60px, 11vw, 180px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-variation-settings: "SOFT" 30, "WONK" 1;
+  margin: 0 -2px 24px;
+  position:relative;
+}
+.hero-title em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+.hero-title .line { display:block; overflow:hidden; }
+.hero-title .word { display:inline-block; opacity:0;
+  transform: translate3d(10px, 60px, -80px) rotateY(55deg) rotateX(-30deg);
+  transform-origin: 50% 50% -150px;
+  will-change:opacity,transform;
+  animation: word-in 0.95s var(--ease) both;
+}
+.hero-title .word.sp { width:.32em; }
+@keyframes word-in {
+  to { opacity:1; transform: translate3d(0,0,0) rotateY(0) rotateX(0); }
+}
+
+.hero-sub {
+  display:grid; grid-template-columns: 1.4fr 1fr; gap:60px; align-items:end;
+  margin-top: 40px; position:relative;
+}
+.hero-sub .lead {
+  font-family:var(--display); font-weight:300; font-size: clamp(20px, 1.6vw, 26px);
+  color:var(--ink); max-width: 32ch; line-height:1.35;
+  text-wrap: pretty;
+  font-variation-settings: "SOFT" 50;
+  opacity:0; transform:translateY(20px);
+  animation: fade-up 1s var(--ease) .9s both;
+}
+.hero-sub .lead .accent { color:var(--accent); font-style:italic; }
+.hero-sub .right {
+  text-align:right;
+  font-family:var(--mono); font-size:11px; color:var(--ink-mute); letter-spacing:.06em;
+  opacity:0; animation: fade-up 1s var(--ease) 1.05s both;
+}
+.hero-sub .right .big { display:block; font-family:var(--display); font-size:48px; color:var(--ink); font-weight:300; letter-spacing:-.02em; margin-bottom:6px; font-style:italic; }
+
+@keyframes fade-up { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+
+/* style switcher */
+.switcher {
+  position:relative;
+  margin-top: 70px;
+  border-top:1px solid var(--line);
+  padding-top: 22px;
+  opacity:0; animation: fade-up 1s var(--ease) 1.2s both;
+}
+.switcher-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--ink-dim);
+  text-transform:uppercase; margin-bottom:14px; display:flex; gap:14px; align-items:center;
+}
+.switcher-label::after { content:""; flex:1; height:1px; background:var(--line); }
+.switcher-label .pulse { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.4; transform:scale(1.4);} }
+
+.chips { display:flex; flex-wrap:wrap; gap:10px; }
+.chip {
+  position:relative;
+  padding: 10px 18px; border:1px solid var(--line); border-radius:999px;
+  font-family:var(--mono); font-size:12px; color:var(--ink-mute); letter-spacing:.02em;
+  background:transparent; cursor:none;
+  transition: color .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease), transform .25s var(--ease);
+  display:inline-flex; align-items:center; gap:8px;
+}
+.chip .swatch { width:10px; height:10px; border-radius:50%; }
+.chip[data-theme="claude"]   .swatch { background:#c85228; }
+.chip[data-theme="linear"]   .swatch { background:#5e6ad2; }
+.chip[data-theme="vercel"]   .swatch { background:#fff; border:1px solid #555; }
+.chip[data-theme="stripe"]   .swatch { background:linear-gradient(135deg,#a78bfa,#00d4ff); }
+.chip[data-theme="ferrari"]  .swatch { background:#ed1c24; }
+.chip[data-theme="raycast"]  .swatch { background:linear-gradient(135deg,#ff6363,#9d6cff); }
+.chip[data-theme="notion"]   .swatch { background:#cb912f; }
+.chip[data-theme="cursor"]   .swatch { background:linear-gradient(135deg,#7e8eff,#62e0c8); }
+.chip:hover { color:var(--ink); border-color:var(--ink-mute); transform:translateY(-2px); }
+.chip.active {
+  color: var(--bg); background: var(--accent); border-color: var(--accent);
+}
+.chip.active .swatch { background:var(--bg); }
+
+/* ─── section base ─────────────────────────────────────── */
+section { padding: 140px 36px; position:relative; }
+.section-head {
+  display:grid; grid-template-columns: 80px 1fr auto; gap:24px; align-items:start;
+  margin-bottom: 70px;
+  padding-bottom: 22px; border-bottom: 1px solid var(--line);
+}
+.section-head .num { font-family:var(--mono); font-size:11px; color:var(--ink-mute); letter-spacing:.1em; padding-top:8px; }
+.section-head h2 {
+  font-family:var(--display); font-weight:300; font-size: clamp(36px, 5.2vw, 76px);
+  line-height: 1; letter-spacing:-.03em;
+  font-variation-settings: "SOFT" 50;
+}
+.section-head h2 em { font-style:italic; color:var(--accent); font-variation-settings: "SOFT" 100, "WONK" 1; }
+.section-head .kicker {
+  font-family:var(--mono); font-size:11px; color:var(--ink-mute); letter-spacing:.1em; padding-top:8px; text-align:right; max-width:200px;
+}
+
+/* ─── bento : what it makes ────────────────────────────── */
+.bento {
+  display:grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 220px; gap: 14px;
+}
+.tile {
+  position:relative; overflow:hidden; padding: 28px;
+  background: var(--bg-soft); border:1px solid var(--line); border-radius: 18px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  transition: transform .4s var(--ease), border-color .3s var(--ease);
+  will-change: transform;
+}
+.tile:hover { border-color: color-mix(in oklab, var(--accent) 40%, var(--line)); }
+.tile .tag { font-family:var(--mono); font-size:10px; color:var(--ink-mute); letter-spacing:.12em; text-transform:uppercase; }
+.tile h3 {
+  font-family:var(--display); font-weight:300; font-size: clamp(22px, 2vw, 32px);
+  letter-spacing:-.02em; line-height:1.05;
+  font-variation-settings: "SOFT" 60;
+}
+.tile h3 em { font-style:italic; color:var(--accent); }
+.tile p { font-size:13px; color:var(--ink-mute); line-height:1.55; max-width:34ch; }
+
+.tile-slides   { grid-column: span 4; }
+.tile-poster   { grid-column: span 2; grid-row: span 2; }
+.tile-pdf      { grid-column: span 3; }
+.tile-proto    { grid-column: span 3; grid-row: span 2; }
+.tile-video    { grid-column: span 4; }
+
+/* —— tile demos —— */
+/* slides */
+.demo-slides { position:absolute; inset:auto -10px -30px auto; display:flex; gap:10px; }
+.demo-slides .s {
+  width:140px; height:90px; border-radius:6px;
+  background:var(--ink); border:1px solid var(--line);
+  position:relative; overflow:hidden;
+  transform: rotate(var(--r)) translateY(0);
+  transition: transform .6s var(--ease);
+}
+.demo-slides .s:nth-child(1) { --r: -8deg; background: var(--bg); border-color:var(--accent); }
+.demo-slides .s:nth-child(2) { --r: 2deg; background: var(--ink); }
+.demo-slides .s:nth-child(3) { --r: 12deg; background: var(--accent); }
+.demo-slides .s::before { content:""; position:absolute; left:10px; top:14px; right:30px; height:6px; background:currentColor; opacity:.6; border-radius:2px; color:var(--accent); }
+.demo-slides .s:nth-child(2)::before { color:var(--bg); }
+.demo-slides .s:nth-child(3)::before { color:var(--bg); }
+.demo-slides .s::after { content:""; position:absolute; left:10px; top:30px; right:50px; height:3px; background:currentColor; opacity:.4; border-radius:2px; color:var(--accent); }
+.demo-slides .s:nth-child(2)::after { color:var(--bg); }
+.demo-slides .s:nth-child(3)::after { color:var(--bg); }
+.tile-slides:hover .demo-slides .s:nth-child(1) { transform: rotate(-14deg) translate(-12px,-6px); }
+.tile-slides:hover .demo-slides .s:nth-child(3) { transform: rotate(18deg) translate(12px,-6px); }
+
+/* poster */
+.demo-poster {
+  position:absolute; inset:24px; top:auto; height:60%;
+  background:var(--accent); border-radius:6px; overflow:hidden;
+  display:flex; align-items:flex-end; padding:14px;
+  box-shadow: 0 30px 60px -30px rgba(0,0,0,.5);
+}
+.demo-poster::before {
+  content:""; position:absolute; inset:0;
+  background: radial-gradient(circle at 30% 30%, var(--accent-2) 0%, transparent 50%);
+  mix-blend-mode: screen;
+}
+.demo-poster .ttl {
+  font-family:var(--display); font-style:italic; font-weight:300; color:var(--bg);
+  font-size:32px; line-height:.9; letter-spacing:-.02em; position:relative; z-index:1;
+}
+
+/* pdf */
+.demo-pdf {
+  position:absolute; right:28px; bottom:-20px; width:160px; height:200px;
+  background: var(--ink); border-radius: 4px; padding:14px;
+  box-shadow: 0 20px 40px -20px rgba(0,0,0,.6);
+  transform: rotate(-4deg);
+  transition: transform .5s var(--ease);
+}
+.demo-pdf .l { height:3px; background:var(--bg); margin-bottom:6px; border-radius:2px; opacity:.7;}
+.demo-pdf .l.h { height:8px; width:60%; background:var(--accent); margin-bottom:10px; opacity:1; }
+.demo-pdf .l.s { width:80%; }
+.demo-pdf .l.x { width:50%; }
+.tile-pdf:hover .demo-pdf { transform: rotate(0deg) translateY(-8px); }
+
+/* prototype */
+.demo-proto {
+  position:absolute; inset:auto 24px 24px 24px; height:55%;
+  border-radius:10px; overflow:hidden;
+  background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 25%, var(--bg-soft)), var(--bg-soft));
+  border: 1px solid var(--line);
+  display:grid; grid-template-rows: auto 1fr; padding:14px; gap:10px;
+}
+.demo-proto .bar { display:flex; gap:5px; }
+.demo-proto .bar i { width:8px; height:8px; border-radius:50%; background:var(--ink-dim); }
+.demo-proto .bar i:first-child { background:var(--accent); }
+.demo-proto .grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; }
+.demo-proto .grid div { background: var(--ink-dim); opacity:.4; border-radius:4px; transition: all .4s var(--ease); }
+.demo-proto .grid div:nth-child(2) { grid-row: span 2; background:var(--accent); opacity:.9; }
+.tile-proto:hover .demo-proto .grid div { opacity:.7; }
+.tile-proto:hover .demo-proto .grid div:nth-child(2) { transform: scale(1.05); }
+.demo-proto .cursor-fake {
+  position:absolute; right:30px; top:60%;
+  width:14px; height:14px; transform:rotate(-30deg);
+  pointer-events:none;
+  animation: cursor-loop 4s var(--ease) infinite;
+}
+.demo-proto .cursor-fake::before {
+  content:""; position:absolute; inset:0;
+  background:var(--ink); clip-path: polygon(0 0, 0 100%, 30% 70%, 50% 100%, 60% 95%, 40% 60%, 100% 60%);
+}
+@keyframes cursor-loop {
+  0%,100% { transform: translate(0,0) rotate(-30deg); }
+  50% { transform: translate(-80px,-40px) rotate(-30deg); }
+}
+
+/* video */
+.demo-video {
+  position:absolute; inset:24px; top:auto; height:55%;
+  border-radius:10px; overflow:hidden; background:var(--bg);
+  border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+}
+.demo-video::before {
+  content:""; position:absolute; inset:0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 8px, color-mix(in oklab, var(--accent) 8%, transparent) 8px 9px);
+}
+.demo-video .play {
+  width:60px; height:60px; border-radius:50%; background:var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 40%, transparent);
+  animation: ring 2s infinite;
+}
+.demo-video .play::after {
+  content:""; width:0; height:0; margin-left:4px;
+  border-left:14px solid var(--bg); border-top:9px solid transparent; border-bottom:9px solid transparent;
+}
+@keyframes ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 50%, transparent); }
+  100% { box-shadow: 0 0 0 30px transparent; }
+}
+.demo-video .scrub {
+  position:absolute; left:14px; right:14px; bottom:14px;
+  height:3px; background:var(--ink-dim); border-radius:2px; overflow:hidden;
+}
+.demo-video .scrub::after {
+  content:""; position:absolute; inset:0; background:var(--accent);
+  transform-origin:left; animation: scrub 4s var(--ease) infinite;
+}
+@keyframes scrub { 0%{transform:scaleX(0);} 100%{transform:scaleX(1);} }
+
+/* ─── process timeline ─────────────────────────────────── */
+.process { position:relative; padding-left:120px; }
+.process-track {
+  position:absolute; left:48px; top:0; bottom:0; width:1px;
+  background:var(--line);
+}
+.process-track::after {
+  content:""; position:absolute; left:0; top:0; width:100%; height:0;
+  background:var(--accent); transition: height .15s linear;
+}
+.step {
+  display:grid; grid-template-columns: 1fr 1.2fr; gap:60px;
+  padding: 60px 0;
+  position:relative;
+  border-bottom: 1px solid var(--line);
+  align-items:start;
+}
+.step:last-child { border-bottom:none; }
+.step::before {
+  content:""; position:absolute; left:-77px; top:72px;
+  width:11px; height:11px; border-radius:50%;
+  background:var(--bg); border:1px solid var(--ink-dim);
+  transition: all .4s var(--ease);
+}
+.step.active::before { background:var(--accent); border-color:var(--accent); box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 25%, transparent); }
+.step .num {
+  font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--ink-mute);
+  text-transform:uppercase;
+}
+.step h3 {
+  font-family:var(--display); font-weight:300; font-size: clamp(28px, 3.4vw, 48px);
+  line-height:1; letter-spacing:-.02em; margin-top:8px;
+  font-variation-settings: "SOFT" 60;
+}
+.step h3 em { font-style:italic; color:var(--accent); }
+.step p { font-size:15px; line-height:1.65; color:var(--ink-mute); margin-bottom:14px; max-width: 50ch; text-wrap:pretty; }
+.step .meta {
+  display:inline-flex; gap:10px; flex-wrap:wrap;
+  font-family:var(--mono); font-size:10px; letter-spacing:.08em; color:var(--ink-mute);
+}
+.step .meta span { padding:4px 10px; border:1px solid var(--line); border-radius:999px; }
+
+/* ─── style library — horizontal scroll ───────────────── */
+.library { overflow:hidden; }
+.library-track {
+  display:flex; gap:18px; padding: 0 36px;
+  cursor: grab;
+  user-select:none;
+}
+.library-track:active { cursor: grabbing; }
+.style-card {
+  flex: 0 0 320px; height: 420px;
+  border-radius: 14px; overflow:hidden; position:relative;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding: 24px; gap:8px;
+  transition: transform .4s var(--ease);
+  will-change: transform;
+}
+.style-card::before {
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.55;
+  background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.style-card .head {
+  position:absolute; top:24px; left:24px; right:24px;
+  display:flex; justify-content:space-between; align-items:flex-start;
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  opacity:.8;
+}
+.style-card .name {
+  font-family:var(--display); font-weight:300; font-style:italic;
+  font-size: 60px; line-height:.95; letter-spacing:-.03em;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+.style-card .desc { font-size:13px; line-height:1.5; opacity:.85; max-width:30ch; }
+
+/* per-style colors (independent of root theme) */
+.sc-claude   { background:#1a1814; color:#f3ede1; } .sc-claude   .accent { color:#c85228; }
+.sc-linear   { background:#08090a; color:#f7f8f8; } .sc-linear   .accent { color:#5e6ad2; }
+.sc-vercel   { background:#000;     color:#fff;    } .sc-vercel   .accent { color:#fff; }
+.sc-stripe   { background:linear-gradient(135deg,#0a2540,#635bff); color:#f6f9fc; } .sc-stripe .accent { color:#a78bfa; }
+.sc-ferrari  { background:#fafafa;  color:#0a0a0a; } .sc-ferrari  .accent { color:#ed1c24; }
+.sc-raycast  { background:#0d0d0d;  color:#fafafa; } .sc-raycast  .accent { color:#ff6363; }
+.sc-notion   { background:#f7f6f3;  color:#191918; } .sc-notion   .accent { color:#cb912f; }
+.sc-cursor   { background:#0c0c0d;  color:#f0f0f0; } .sc-cursor   .accent { color:#7e8eff; }
+.sc-apple    { background:#000;     color:#fff;    } .sc-apple    .accent { color:#fff; }
+.sc-spacex   { background:#0a0a0a;  color:#fff;    } .sc-spacex   .accent { color:#fff; }
+.sc-airbnb   { background:#fff5f0;  color:#222;    } .sc-airbnb   .accent { color:#ff5a5f; }
+.sc-figma    { background:#1e1e1e;  color:#fff;    } .sc-figma    .accent { color:#a259ff; }
+
+.style-card:hover { transform: translateY(-8px); }
+
+.library-meta {
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 18px 36px 0; margin-top: 20px;
+  font-family:var(--mono); font-size:11px; color:var(--ink-mute); letter-spacing:.08em;
+}
+.library-meta .hint { display:flex; align-items:center; gap:8px; }
+.library-meta .hint::before { content:"⇆"; font-family:inherit; color:var(--accent); }
+
+/* ─── cta / terminal ───────────────────────────────────── */
+.cta {
+  background: var(--bg-soft);
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.terminal {
+  max-width: 920px; margin: 0 auto;
+  border:1px solid var(--line); border-radius: 14px;
+  background: var(--bg);
+  overflow:hidden;
+  box-shadow: 0 60px 120px -60px rgba(0,0,0,.6);
+}
+.terminal-bar {
+  display:flex; align-items:center; gap:8px;
+  padding: 14px 18px; border-bottom:1px solid var(--line);
+  font-family:var(--mono); font-size:11px; color:var(--ink-mute);
+}
+.terminal-bar .dots { display:flex; gap:6px; margin-right:10px; }
+.terminal-bar .dots i { width:10px; height:10px; border-radius:50%; background:var(--ink-dim); }
+.terminal-bar .dots i:nth-child(1){ background:#ff5f56; }
+.terminal-bar .dots i:nth-child(2){ background:#ffbd2e; }
+.terminal-bar .dots i:nth-child(3){ background:#27c93f; }
+.terminal-body {
+  padding: 36px 28px 40px; font-family:var(--mono); font-size:14px; line-height:1.9;
+}
+.terminal-body .line { display:block; }
+.terminal-body .prompt { color:var(--accent); }
+.terminal-body .cmd { color:var(--ink); }
+.terminal-body .out { color:var(--ink-mute); }
+.terminal-body .ok { color:var(--accent-2); }
+.terminal-body .typed { display:inline-block; position:relative; }
+.cursor-blink::after {
+  content:"▊"; color:var(--accent); margin-left:2px;
+  animation: blink 1s steps(2) infinite;
+}
+@keyframes blink { 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
+
+.cta-foot {
+  text-align:center; margin-top: 60px;
+  font-family:var(--display); font-style:italic; font-weight:300;
+  font-size: clamp(28px, 4vw, 56px);
+  line-height:1.1; letter-spacing:-.02em;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+.cta-foot .accent { color:var(--accent); }
+
+/* ─── footer ───────────────────────────────────────────── */
+footer {
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 36px; border-top: 1px solid var(--line);
+  font-family:var(--mono); font-size:11px; color:var(--ink-mute); letter-spacing:.08em;
+}
+footer .colophon { font-family:var(--display); font-style:italic; color:var(--ink); font-size:14px; letter-spacing:0; }
+
+/* ─── reveal helper ───────────────────────────────────── */
+.reveal { opacity:0; transform: translateY(40px); transition: opacity 1s var(--ease), transform 1s var(--ease); }
+.reveal.in { opacity:1; transform: translateY(0); }
+
+/* ─── theme flash overlay ─────────────────────────────── */
+#flash {
+  position: fixed; inset:0; z-index:9998;
+  background: var(--accent);
+  transform: scaleY(0); transform-origin: bottom;
+  pointer-events: none;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .hero { padding: 110px 22px 40px; }
+  section { padding: 90px 22px; }
+  .nav { padding: 18px 22px; }
+  .nav .links { display:none; }
+  .hero-sub { grid-template-columns:1fr; gap:28px; }
+  .section-head { grid-template-columns: 1fr; gap:14px; }
+  .section-head .kicker { text-align:left; max-width:none; }
+  .bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 200px; }
+  .tile-slides, .tile-poster, .tile-pdf, .tile-proto, .tile-video { grid-column: span 2; grid-row: auto; }
+  .step { grid-template-columns: 1fr; gap:18px; padding: 40px 0; }
+  .process { padding-left: 60px; }
+  .process-track { left: 18px; }
+  .step::before { left:-47px; top:36px; }
+  body { cursor:auto; }
+  .cursor, .cursor-dot { display:none; }
+}
+</style>
+</head>
+<body data-scroll>
+
+<!-- cursor -->
+<div class="cursor"></div>
+<div class="cursor-dot"></div>
+<div id="flash"></div>
+
+<!-- nav -->
+<nav class="nav">
+  <a class="brand" href="#"><span class="dot"></span> ccdesign</a>
+  <div class="links">
+    <a href="#makes">outputs</a>
+    <a href="#process">process</a>
+    <a href="#styles">styles</a>
+    <a href="#invoke">invoke</a>
+  </div>
+  <div class="links" style="font-family:var(--mono);">v1 — design, by Claude</div>
+</nav>
+
+<!-- hero -->
+<header class="hero" id="top">
+  <div class="hero-meta">
+    <div>① of 05 — design agent</div>
+    <div class="count" data-count>~/.claude/skills/ccdesign</div>
+    <div>2026 · curated by claude</div>
+  </div>
+
+  <div>
+    <h1 class="hero-title" data-split>
+      <span class="line">Your <em>design</em></span>
+      <span class="line">director,</span>
+      <span class="line">on call.</span>
+    </h1>
+
+    <div class="hero-sub">
+      <p class="lead">
+        A skill that thinks like a <span class="accent">junior designer</span>—
+        asks the right questions, reads brand systems, then ships
+        <em>slides, posters, PDFs, prototypes & videos</em> that don't look generated.
+      </p>
+      <div class="right">
+        <span class="big">38</span>
+        brand design systems<br/>·   one taste vocabulary
+      </div>
+    </div>
+
+    <!-- live style switcher -->
+    <div class="switcher">
+      <div class="switcher-label"><span class="pulse"></span>this page is alive — pick a style</div>
+      <div class="chips">
+        <button class="chip active" data-theme="claude"><span class="swatch"></span>claude</button>
+        <button class="chip" data-theme="linear"><span class="swatch"></span>linear</button>
+        <button class="chip" data-theme="stripe"><span class="swatch"></span>stripe</button>
+        <button class="chip" data-theme="vercel"><span class="swatch"></span>vercel</button>
+        <button class="chip" data-theme="raycast"><span class="swatch"></span>raycast</button>
+        <button class="chip" data-theme="cursor"><span class="swatch"></span>cursor</button>
+        <button class="chip" data-theme="ferrari"><span class="swatch"></span>ferrari</button>
+        <button class="chip" data-theme="notion"><span class="swatch"></span>notion</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ─── what it makes ─── -->
+<section id="makes">
+  <div class="section-head reveal">
+    <div class="num">02 / outputs</div>
+    <h2>five formats, <em>one taste.</em></h2>
+    <div class="kicker">slides · posters · pdfs · prototypes · videos</div>
+  </div>
+
+  <div class="bento">
+    <div class="tile tile-slides reveal" data-tilt>
+      <div>
+        <div class="tag">slides · pptx</div>
+        <h3>Decks people <em>actually finish</em>.</h3>
+      </div>
+      <p>Editorial typography, dark/light sandwich rhythm, never a tab interface in sight.</p>
+      <div class="demo-slides">
+        <div class="s"></div><div class="s"></div><div class="s"></div>
+      </div>
+    </div>
+
+    <div class="tile tile-poster reveal" data-tilt>
+      <div>
+        <div class="tag">poster · jpg</div>
+        <h3>Loud posters, <em>quiet craft</em>.</h3>
+      </div>
+      <p>Fixed-px HTML, screenshot at full res.</p>
+      <div class="demo-poster">
+        <div class="ttl">make<br/>it loud</div>
+      </div>
+    </div>
+
+    <div class="tile tile-pdf reveal" data-tilt>
+      <div>
+        <div class="tag">document · pdf</div>
+        <h3>Reports with <em>typography</em>.</h3>
+      </div>
+      <p>HTML → weasyprint or reportlab — print-ready, never a default-Word smell.</p>
+      <div class="demo-pdf">
+        <div class="l h"></div>
+        <div class="l"></div><div class="l s"></div><div class="l"></div><div class="l x"></div>
+        <div class="l"></div><div class="l s"></div><div class="l x"></div>
+      </div>
+    </div>
+
+    <div class="tile tile-proto reveal" data-tilt>
+      <div>
+        <div class="tag">prototype · html</div>
+        <h3>Living <em>web prototypes</em>.</h3>
+      </div>
+      <p>GSAP scroll, custom cursors, 3D tilt, scrub-clip — interaction blueprints, not just pretty pictures.</p>
+      <div class="demo-proto">
+        <div class="bar"><i></i><i></i><i></i></div>
+        <div class="grid"><div></div><div></div><div></div><div></div><div></div><div></div></div>
+        <div class="cursor-fake"></div>
+      </div>
+    </div>
+
+    <div class="tile tile-video reveal" data-tilt>
+      <div>
+        <div class="tag">video · remotion</div>
+        <h3>Motion, <em>composed</em>.</h3>
+      </div>
+      <p>Frame-perfect timing, eased like anime.js — handed off to the remotion skill.</p>
+      <div class="demo-video">
+        <div class="play"></div>
+        <div class="scrub"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── process ─── -->
+<section id="process" style="background:var(--bg-soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="section-head reveal">
+    <div class="num">03 / process</div>
+    <h2>thinks <em>before</em> it draws.</h2>
+    <div class="kicker">8 steps · brief-first · no slop</div>
+  </div>
+
+  <div class="process">
+    <div class="process-track"></div>
+
+    <article class="step">
+      <div>
+        <div class="num">step 01</div>
+        <h3>identify the <em>output type</em></h3>
+      </div>
+      <div>
+        <p>Slides? Poster? Living prototype? PDF report? Video? Different deliverables, different physics. The skill names the output before doing anything else, so you can correct course in one sentence.</p>
+        <div class="meta"><span>pptx</span><span>html</span><span>pdf</span><span>image</span><span>remotion</span></div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div>
+        <div class="num">step 02</div>
+        <h3>ask, then <em>shut up</em></h3>
+      </div>
+      <div>
+        <p>One numbered list of questions — audience, brand assets, style reference. No design happens until you reply. Restraint is the discipline.</p>
+        <div class="meta"><span>audience</span><span>brand</span><span>reference</span></div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div>
+        <div class="num">step 03</div>
+        <h3>read the brand's <em>own design.md</em></h3>
+      </div>
+      <div>
+        <p>Pick a style from the local design-md library — exact hex codes, type pairings, do-and-don't lists. The agent doesn't approximate Stripe purple. It uses the value Stripe uses.</p>
+        <div class="meta"><span>38 systems</span><span>local first</span><span>web fallback</span></div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div>
+        <div class="num">step 04</div>
+        <h3>write a <em>design brief</em></h3>
+      </div>
+      <div>
+        <p>Before any code: a single creative thesis, the "wow moment," the visual language and the interaction signature. You read it. You correct. Only then does the agent open its editor.</p>
+        <div class="meta"><span>thesis</span><span>highlight</span><span>signature</span></div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div>
+        <div class="num">step 05</div>
+        <h3>map every effect to a <em>real implementation</em></h3>
+      </div>
+      <div>
+        <p>An interaction blueprint: each component → which library → which technique → which local reference file. No invented APIs, no hallucinated CSS.</p>
+        <div class="meta"><span>gsap</span><span>scrollreveal</span><span>anime.js</span><span>vanilla 3d-tilt</span></div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div>
+        <div class="num">step 06–09</div>
+        <h3>generate, verify, <em>hand off</em></h3>
+      </div>
+      <div>
+        <p>Three variants by default — conservative, standard, bold. Screenshots at full resolution. Sub-skills (pptx / pdf / remotion) take it home.</p>
+        <div class="meta"><span>3 variants</span><span>screenshot QA</span><span>handoff</span></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ─── style library ─── -->
+<section id="styles">
+  <div class="section-head reveal">
+    <div class="num">04 / library</div>
+    <h2>a vocabulary of <em>thirty-eight tastes.</em></h2>
+    <div class="kicker">drag horizontally</div>
+  </div>
+</section>
+
+<div class="library reveal">
+  <div class="library-track" id="libraryTrack">
+    <article class="style-card sc-claude">
+      <div class="head"><span>warm / editorial</span><span class="accent">claude</span></div>
+      <div class="name">claude</div>
+      <p class="desc">Terracotta on cream paper. Editorial restraint, warm tactility.</p>
+    </article>
+    <article class="style-card sc-linear">
+      <div class="head"><span>precision</span><span class="accent">linear</span></div>
+      <div class="name">linear</div>
+      <p class="desc">Pixel-precise, violet accents, ruthlessly clean.</p>
+    </article>
+    <article class="style-card sc-stripe">
+      <div class="head"><span>infrastructure</span><span class="accent">stripe</span></div>
+      <div class="name">stripe</div>
+      <p class="desc">Iridescent purple gradients, weight-300 elegance.</p>
+    </article>
+    <article class="style-card sc-vercel">
+      <div class="head"><span>monochrome</span><span class="accent">vercel</span></div>
+      <div class="name">vercel</div>
+      <p class="desc">Black, white, Geist, the deployment platform deadpan.</p>
+    </article>
+    <article class="style-card sc-raycast">
+      <div class="head"><span>productivity</span><span class="accent">raycast</span></div>
+      <div class="name">raycast</div>
+      <p class="desc">Dark chrome, lively gradients, command-bar energy.</p>
+    </article>
+    <article class="style-card sc-cursor">
+      <div class="head"><span>ide / ai</span><span class="accent">cursor</span></div>
+      <div class="name">cursor</div>
+      <p class="desc">Editor dark, soft gradients, AI-coding ambient glow.</p>
+    </article>
+    <article class="style-card sc-ferrari">
+      <div class="head"><span>luxury / power</span><span class="accent">ferrari</span></div>
+      <div class="name">ferrari</div>
+      <p class="desc">White cathedral, single red accent, oversized type.</p>
+    </article>
+    <article class="style-card sc-notion">
+      <div class="head"><span>document</span><span class="accent">notion</span></div>
+      <div class="name">notion</div>
+      <p class="desc">Warm white, serif headers, generous whitespace.</p>
+    </article>
+    <article class="style-card sc-airbnb">
+      <div class="head"><span>warm / human</span><span class="accent">airbnb</span></div>
+      <div class="name">airbnb</div>
+      <p class="desc">Coral warmth, photography-driven, rounded UI.</p>
+    </article>
+    <article class="style-card sc-figma">
+      <div class="head"><span>creative</span><span class="accent">figma</span></div>
+      <div class="name">figma</div>
+      <p class="desc">Multicolor, playful, collaboration-first.</p>
+    </article>
+    <article class="style-card sc-spacex">
+      <div class="head"><span>cinematic</span><span class="accent">spacex</span></div>
+      <div class="name">spacex</div>
+      <p class="desc">Pure black, full-bleed photography, future-myth.</p>
+    </article>
+    <article class="style-card sc-apple">
+      <div class="head"><span>premium</span><span class="accent">apple</span></div>
+      <div class="name">apple</div>
+      <p class="desc">SF Pro discipline, cinematic product shots, infinite white.</p>
+    </article>
+  </div>
+  <div class="library-meta">
+    <div class="hint">drag or scroll horizontally · 12 of 38 shown</div>
+    <div>plus &nbsp;tesla · ibm · spotify · supabase · pinterest · runwayml · framer · ...</div>
+  </div>
+</div>
+
+<!-- ─── cta / terminal ─── -->
+<section id="invoke" class="cta">
+  <div class="section-head reveal">
+    <div class="num">05 / invoke</div>
+    <h2>direct your <em>designer</em>.</h2>
+    <div class="kicker">one line. ship.</div>
+  </div>
+
+  <div class="terminal reveal">
+    <div class="terminal-bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <span>~/your-project — claude-code</span>
+    </div>
+    <div class="terminal-body">
+      <span class="line"><span class="prompt">›</span> <span class="cmd">/ccdesign</span> <span class="out">a landing page for our new pricing,</span></span>
+      <span class="line">  <span class="out">audience: enterprise buyers, in the style of</span> <span class="cmd">stripe</span></span>
+      <span class="line">&nbsp;</span>
+      <span class="line out">  reading design-md for stripe...</span>
+      <span class="line out">  → palette: 0a2540 / 635bff / 00d4ff</span>
+      <span class="line out">  → fonts: sohne · sohne mono</span>
+      <span class="line out">  → motif: gradient lattice · weight-300 display</span>
+      <span class="line">&nbsp;</span>
+      <span class="line"><span class="ok">✓</span> <span class="out">design brief drafted — review before code?</span></span>
+      <span class="line"><span class="prompt">›</span> <span class="typed cursor-blink" id="typer"></span></span>
+    </div>
+  </div>
+
+  <p class="cta-foot reveal">
+    Stop generating <span class="accent">slop</span>.<br/>
+    Start <em>directing</em>.
+  </p>
+</section>
+
+<footer>
+  <div class="colophon">— ccdesign · the design skill that reads the room first.</div>
+  <div>v1 · 2026 · made with claude code</div>
+</footer>
+
+<!-- libs (with CSS fallback already in place above) -->
+<script src="frontend_design_repos/award-winning-website/node_modules/gsap/dist/gsap.min.js"></script>
+<script src="frontend_design_repos/award-winning-website/node_modules/gsap/dist/ScrollTrigger.min.js"></script>
+
+<script>
+/* ─── 0. split words for hero (CSS @keyframes does the rest) ─── */
+(function splitHero(){
+  document.querySelectorAll('[data-split] .line').forEach(line => {
+    const text = line.innerHTML.trim();
+    // walk through children — if it's <em>x</em> keep it together as a "word"
+    const parts = [];
+    const tmp = document.createElement('div');
+    tmp.innerHTML = text;
+    tmp.childNodes.forEach(n => {
+      if (n.nodeType === 3) {
+        n.textContent.split(/(\s+)/).forEach(t => {
+          if (!t) return;
+          if (/\s+/.test(t)) parts.push({sp:true});
+          else parts.push({text:t});
+        });
+      } else {
+        parts.push({text:n.outerHTML, html:true});
+      }
+    });
+    line.innerHTML = parts.map((p, i) => {
+      if (p.sp) return `<span class="word sp"></span>`;
+      const delay = (0.1 + i*0.06).toFixed(2);
+      return `<span class="word" style="animation-delay:${delay}s">${p.text}</span>`;
+    }).join('');
+  });
+})();
+
+/* ─── 1. custom magnetic cursor ─── */
+(function cursor(){
+  const c = document.querySelector('.cursor');
+  const d = document.querySelector('.cursor-dot');
+  if (!c) return;
+  let tx=0, ty=0, cx=0, cy=0, dx=0, dy=0;
+  document.addEventListener('mousemove', e => { tx=e.clientX; ty=e.clientY; });
+  (function loop(){
+    cx += (tx-cx)*.18; cy += (ty-cy)*.18;
+    dx += (tx-dx)*.55; dy += (ty-dy)*.55;
+    c.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
+    d.style.transform = `translate(${dx}px,${dy}px) translate(-50%,-50%)`;
+    requestAnimationFrame(loop);
+  })();
+  document.querySelectorAll('a, button, .chip, .tile, .style-card').forEach(el=>{
+    el.addEventListener('mouseenter', ()=>document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', ()=>document.body.classList.remove('cursor-hover'));
+  });
+})();
+
+/* ─── 2. live style switcher with flash transition ─── */
+(function switcher(){
+  const chips = document.querySelectorAll('.chip');
+  const flash = document.getElementById('flash');
+  chips.forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const theme = chip.dataset.theme;
+      // flash sweep
+      flash.style.transformOrigin = 'bottom';
+      flash.animate(
+        [{transform:'scaleY(0)'},{transform:'scaleY(1)'}],
+        {duration:280, easing:'cubic-bezier(.7,0,.3,1)', fill:'forwards'}
+      );
+      setTimeout(()=>{
+        document.documentElement.dataset.theme = theme;
+        chips.forEach(c=>c.classList.toggle('active', c===chip));
+        flash.style.transformOrigin = 'top';
+        flash.animate(
+          [{transform:'scaleY(1)'},{transform:'scaleY(0)'}],
+          {duration:380, easing:'cubic-bezier(.7,0,.3,1)', fill:'forwards'}
+        );
+      }, 280);
+    });
+  });
+  document.documentElement.dataset.theme = 'claude';
+})();
+
+/* ─── 3. 3D tilt for tiles ─── */
+(function tilt(){
+  document.querySelectorAll('[data-tilt]').forEach(el=>{
+    let raf=null;
+    el.addEventListener('mousemove', e=>{
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left)/r.width - .5;
+      const y = (e.clientY - r.top)/r.height - .5;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(()=>{
+        el.style.transform = `perspective(900px) rotateX(${y*-6}deg) rotateY(${x*8}deg) translateY(-4px)`;
+      });
+    });
+    el.addEventListener('mouseleave', ()=>{
+      el.style.transition = 'transform .6s cubic-bezier(.16,1,.3,1)';
+      el.style.transform = '';
+      setTimeout(()=>el.style.transition='', 600);
+    });
+    el.addEventListener('mouseenter', ()=>{ el.style.transition=''; });
+  });
+})();
+
+/* ─── 4. reveal on scroll + process track + steps active ─── */
+(function reveal(){
+  // Primary: IntersectionObserver — always runs, never depends on a 3rd-party lib
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
+  }, {threshold:0.08, rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // Hard safety net: after 2.5s force everything visible no matter what
+  setTimeout(()=>document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in')), 2500);
+
+  if (!window.gsap || !window.ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  // process track fill (real child element, not pseudo)
+  const track = document.querySelector('.process-track');
+  if (track) {
+    const bar = document.createElement('div');
+    bar.style.cssText = 'position:absolute;left:0;top:0;width:100%;background:var(--accent);height:0;';
+    track.appendChild(bar);
+    ScrollTrigger.create({
+      trigger:'.process', start:'top center', end:'bottom center', scrub:true,
+      onUpdate: self => { bar.style.height = (self.progress * 100).toFixed(2) + '%'; }
+    });
+  }
+
+  document.querySelectorAll('.step').forEach(step=>{
+    ScrollTrigger.create({
+      trigger:step, start:'top 70%', end:'bottom 30%',
+      onEnter:()=>step.classList.add('active'),
+      onEnterBack:()=>step.classList.add('active'),
+      onLeave:()=>step.classList.remove('active'),
+      onLeaveBack:()=>step.classList.remove('active'),
+    });
+  });
+})();
+
+/* ─── 5. horizontal drag scroll for library ─── */
+(function dragScroll(){
+  const track = document.getElementById('libraryTrack');
+  if (!track) return;
+  const wrapper = track.parentElement;
+  let isDown=false, startX=0, scrollLeft=0;
+
+  wrapper.addEventListener('mousedown', e=>{
+    isDown=true; startX = e.pageX - wrapper.offsetLeft; scrollLeft = wrapper.scrollLeft;
+    wrapper.style.scrollBehavior = 'auto';
+  });
+  ['mouseleave','mouseup'].forEach(ev=>wrapper.addEventListener(ev, ()=>isDown=false));
+  wrapper.addEventListener('mousemove', e=>{
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - wrapper.offsetLeft;
+    wrapper.scrollLeft = scrollLeft - (x - startX) * 1.5;
+  });
+  // wheel: vertical → horizontal
+  wrapper.addEventListener('wheel', e=>{
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      wrapper.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, {passive:false});
+  wrapper.style.overflowX = 'auto';
+  wrapper.style.scrollbarWidth = 'none';
+  // hide scrollbar webkit
+  const s = document.createElement('style');
+  s.textContent = `.library::-webkit-scrollbar{display:none}`;
+  document.head.appendChild(s);
+})();
+
+/* ─── 6. terminal typer ─── */
+(function typer(){
+  const el = document.getElementById('typer');
+  if (!el) return;
+  const phrases = ['ship it', 'show me v1', 'try ferrari instead', 'export to pptx'];
+  let pi=0, ci=0, deleting=false;
+  function tick(){
+    const word = phrases[pi];
+    if (!deleting) {
+      ci++;
+      if (ci > word.length) { deleting=true; setTimeout(tick, 1400); return; }
+    } else {
+      ci--;
+      if (ci < 0) { deleting=false; pi=(pi+1)%phrases.length; setTimeout(tick, 280); return; }
+    }
+    el.textContent = word.slice(0, ci);
+    setTimeout(tick, deleting? 40 : 80);
+  }
+  tick();
+})();
+</script>
+</body>
+</html>

@@ -9,6 +9,57 @@
 
 ---
 
+## 案例展示 — skill 给自己设计的官网
+
+我们让 ccdesign 给*它自己*做一个官网，风格、组件、布局、交互完全由它决定。成品在 [`examples/ccdesign-landing.html`](examples/ccdesign-landing.html)。这个页面的灵魂交互正是 skill 的核心能力的具象化——点击 hero 区域任一 chip，整页配色、点缀、渐变实时换装，正如 skill 在读取某个品牌 `DESIGN.md` 时所做的事。
+
+<p align="center">
+  <img src="assets/showcase/01-hero.png" alt="hero" width="900"/>
+</p>
+
+**同一个 hero，三种风格，每种只需一次点击：**
+
+<p align="center">
+  <img src="assets/showcase/06-theme-stripe.png"  alt="Stripe 风格"  width="32%"/>
+  <img src="assets/showcase/07-theme-ferrari.png" alt="Ferrari 风格" width="32%"/>
+  <img src="assets/showcase/08-theme-linear.png"  alt="Linear 风格"  width="32%"/>
+</p>
+
+**五种输出格式，每个 tile 悬停时都有专属微动画：**
+
+<p align="center">
+  <img src="assets/showcase/02-bento-outputs.png" alt="Bento 输出展示" width="900"/>
+</p>
+
+**八步设计流程时间轴，由滚动驱动：**
+
+<p align="center">
+  <img src="assets/showcase/03-process.png" alt="流程时间轴" width="900"/>
+</p>
+
+**38 种风格陈列柜，可水平拖拽：**
+
+<p align="center">
+  <img src="assets/showcase/04-library.png" alt="风格库" width="900"/>
+</p>
+
+**终端式 CTA — 像导演一样下指令：**
+
+<p align="center">
+  <img src="assets/showcase/05-cta-terminal.png" alt="终端 CTA" width="900"/>
+</p>
+
+**技术细节：** Fraunces + Inter Tight + JetBrains Mono · CSS 变量做实时换肤 · GSAP + ScrollTrigger 做滚动绑定 · IntersectionObserver 兜底 reveal · 纯 JS 实现磁吸光标和 3D 透视倾斜 · Web Animations API 做风格切换的全屏闪光转场。
+
+本地运行：
+
+```bash
+cd examples && python3 -m http.server 8080
+open http://localhost:8080/ccdesign-landing.html
+```
+
+---
+
 ## 能做什么
 
 `/design` 是所有视觉创作任务的统一入口。你描述需求 —— 投资人 PPT、落地页、海报、PDF 报告 —— skill 先做设计决策（颜色、字体、布局、多方案对比），再交给对应工具生成文件。
