@@ -48,6 +48,32 @@
 | **模糊加载渐进清晰** | 纯 JS mapRange | `07-vanilla.md` 效果6 |
 | **鼠标文字阴影** | 纯 JS | `07-vanilla.md` 效果10 |
 | **Hoverboard 色块** | 纯 JS | `07-vanilla.md` 效果11 |
+| **DOM 状态无缝切换（Flip）** | GSAP Flip plugin | `01-gsap.md` 效果11 |
+| **元素沿 SVG 路径运动** | GSAP MotionPathPlugin | `01-gsap.md` 效果12 |
+| **拖拽 + 边界 + 碰撞检测** | GSAP Draggable | `01-gsap.md` 效果13 |
+| **全屏翻页（滚轮/触摸）** | GSAP Observer | `01-gsap.md` 效果14 |
+| **打字机 / 文字轮播** | GSAP TextPlugin | `01-gsap.md` 效果15 |
+| **抖动/慢镜/完全自定义缓动** | GSAP RoughEase/SlowMo/CustomEase | `01-gsap.md` 效果16 |
+| **滚动速度 skewY 倾斜感** | GSAP ScrollTrigger velocity | `01-gsap.md` 效果17 |
+| **网格 stagger 从中心扩散** | GSAP grid stagger | `01-gsap.md` 效果18 |
+| **SVG 形状变形（morphTo）** | anime.js svg.morphTo | `02-anime.md` 效果11 |
+| **值域修改器（正弦漂移/取整/循环）** | anime.js modifier | `02-anime.md` 效果12 |
+| **萤火虫/混合模式粒子** | anime.js composition:blend | `02-anime.md` 效果13 |
+| **DOM 重排自动过渡动画** | anime.js createLayout | `02-anime.md` 效果14 |
+| **有机感打字机缓动** | anime.js irregular easing | `02-anime.md` 效果15 |
+| **弹性拖拽表盘/旋钮** | anime.js Draggable + Spring | `02-anime.md` 效果16 |
+| **Timeline .set() 闪现序列** | anime.js Timeline | `02-anime.md` 效果17 |
+| **齿轮/波浪循环旋转（modValue）** | lax.js modValue | `03-lax.md` 效果9 |
+| **滚动 + 鼠标融合视差** | lax.js 多驱动器 | `03-lax.md` 效果10 |
+| **速度感动态阴影（惯性）** | lax.js inertia + cssFn | `03-lax.md` 效果11 |
+| **onUpdate 逐帧 DOM 控制** | lax.js onUpdate | `03-lax.md` 效果12 |
+| **水平 Snap 滚动视差** | lax.js scrollX driver | `03-lax.md` 效果13 |
+| **精确触发时机（可见比例）** | ScrollReveal viewFactor | `04-scrollreveal.md` 效果8 |
+| **提前/延后触发偏移** | ScrollReveal viewOffset | `04-scrollreveal.md` 效果9 |
+| **Y 轴翻转/百叶窗/纸落入场** | ScrollReveal 3D rotate | `04-scrollreveal.md` 效果10 |
+| **多阶段 reveal 堆叠/重绑定** | ScrollReveal cleanup | `04-scrollreveal.md` 效果11 |
+| **非 window 容器内滚动触发** | ScrollReveal container | `04-scrollreveal.md` 效果12 |
+| **品质感缓动字符串组合** | ScrollReveal easing | `04-scrollreveal.md` 效果13 |
 
 ---
 
@@ -84,10 +110,10 @@ barba.js:      npm install @barba/core（无本地 dist，需 npm）
 
 | 文件 | 内容 |
 |------|------|
-| `01-gsap.md` | ClipPath变形、文字飞入、pin钉选、鼠标3D、导航隐显、视频切换、进度条ticker、Timeline |
-| `02-anime.md` | 基础动画、stagger、Timeline、Keyframes、SVG绘制、文字split、滚动联动、粒子、打字机 |
-| `03-lax.md` | 视差入场出场、多层视差、鼠标视差、惯性动画、cssFn复杂属性、断点响应、精灵图 |
-| `04-scrollreveal.md` | 序列入场、方向入场、3D旋转、缩放、loop重复、移动端禁用、AJAX后重扫描 |
+| `01-gsap.md` | ClipPath、文字飞入、pin、鼠标3D、导航隐显、视频切换、Timeline + **Flip、MotionPath、Draggable、Observer、TextPlugin、RoughEase/CustomEase、velocity skew、grid stagger** |
+| `02-anime.md` | stagger、Timeline、SVG绘制、splitText、滚动联动、粒子 + **morphTo、modifier、blend fireflies、createLayout、irregular、Spring dial、.set() flash** |
+| `03-lax.md` | 多层视差、鼠标视差、惯性、精灵图、onUpdate + **modValue循环、多驱动融合、速度阴影、逐帧DOM、水平Snap** |
+| `04-scrollreveal.md` | 序列入场、方向入场、3D旋转、loop + **viewFactor精确触发、viewOffset偏移、复杂3D翻转、cleanup堆叠、自定义容器、品质缓动** |
 | `05-animate-css.md` | 70+预制动画类名、JS动态触发、弹窗进出、按钮反馈、速度延迟控制 |
 | `06-barba.md` | 淡入淡出、滑动切换、同步过渡、命名空间匹配、首次加载、全局钩子 |
 | `07-vanilla.md` | 波纹、3D倾斜、光标、滚动入场、展开卡片、模糊加载、表单波浪、分割页、轮播、数字计数 |
